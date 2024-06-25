@@ -29,33 +29,24 @@ export const registerUser = async (req: Request<{}, {}, RegisterRequest>, res: R
   }
 };
 
-// Obter um usuário específico pelo ID
-export const getUserById = async (req: Request, res: Response): Promise<void> => {
-  const userId = req.params.id; // Captura o ID do parâmetro da URL
+// Autenticação de usuário (login)
+export const loginUser = async (req: Request, res: Response): Promise<void> => {
+  const { username, password } = req.query as { username: string; password: string };
+  console.log('Trying to login user:', { username, password }, '(BACK-END MESSAGE!)');
 
   try {
-    const user = await User.findById(userId).populate('tasks');
+    // Busca pelo usuário no banco de dados pelo nome de usuário e senha
+    const user = await User.findOne({ name: username, password });
 
     if (!user) {
-      res.status(404).json({ error: 'User not found' });
+      res.status(401).json({ error: 'Invalid username or password' });
       return;
     }
 
-    res.status(200).json(user);
-  } catch (err) {
-    if (err instanceof Error) {
-      res.status(500).json({ error: err.message });
-    } else {
-      res.status(500).json({ error: 'An unknown error occurred' });
-    }
-  }
-};
+    const { password: _, ...userData } = user.toObject();
 
-// Obter todos os usuários
-export const getUsers = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const users = await User.find().populate('tasks');
-    res.status(200).json(users);
+    console.log('Logged in user:', { username }, ' ✔️ (BACK-END MESSAGE!)');
+    res.status(200).json({ user: userData });
   } catch (err) {
     if (err instanceof Error) {
       res.status(500).json({ error: err.message });
