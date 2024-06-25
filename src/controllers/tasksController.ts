@@ -5,7 +5,7 @@ import User from '../models/userModel';
 
 // Criar nova tarefa
 export const createTask = async (req: Request, res: Response): Promise<void> => {
-  const { title, description, status, userId } = req.body;
+  const { title, userId } = req.body;
 
   try {
     // Verificar se o usuário existe
@@ -18,8 +18,6 @@ export const createTask = async (req: Request, res: Response): Promise<void> => 
     // Criar a nova tarefa
     const task = new Task({
       title,
-      description,
-      status,
       user: userId,
     });
 

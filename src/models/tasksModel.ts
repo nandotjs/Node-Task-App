@@ -12,16 +12,6 @@ const TaskSchema: Schema = new Schema({
     type: String,
     required: true,
   },
-  description: {
-    type: String,
-    required: true,
-  },
-  status: {
-    type: String,
-    required: true,
-    enum: ['pending', 'in-progress', 'completed'],
-    default: 'pending',
-  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
