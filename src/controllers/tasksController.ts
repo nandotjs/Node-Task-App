@@ -83,3 +83,42 @@ export const deleteAllTasksByUser = async (req: Request, res: Response): Promise
     }
   }
 };
+
+// Excluir uma tarefa específica pelo índice
+export const deleteTaskByIndex = async (req: Request, res: Response): Promise<void> => {
+  const { userId, index } = req.params;
+
+  try {
+    // Verificar se o usuário existe
+    const user = await User.findById(userId).populate('tasks');
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    // Converter index para número
+    const taskIndex = parseInt(index, 10);
+    if (isNaN(taskIndex) || taskIndex < 0 || taskIndex >= user.tasks.length) {
+      res.status(400).json({ error: 'Invalid task index' });
+      return;
+    }
+
+    // Obter o ID da tarefa a ser removida
+    const taskId = user.tasks[taskIndex]._id;
+
+    // Remover a tarefa do banco de dados
+    await Task.findByIdAndDelete(taskId);
+
+    // Remover a tarefa da lista de tarefas do usuário
+    user.tasks.splice(taskIndex, 1);
+    await user.save();
+
+    res.status(200).json({ message: 'Task deleted successfully' });
+  } catch (err) {
+    if (err instanceof Error) {
+      res.status(500).json({ error: 'oi' });
+    } else {
+      res.status(500).json({ error: 'An unknown error occurred' });
+    }
+  }
+};
