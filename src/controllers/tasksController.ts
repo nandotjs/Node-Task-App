@@ -18,6 +18,7 @@ export const createTask = async (req: Request, res: Response): Promise<void> => 
     // Criar a nova tarefa
     const task = new Task({
       title,
+
       user: userId,
     });
 
@@ -44,7 +45,36 @@ export const getTasksByUser = async (req: Request, res: Response): Promise<void>
 
   try {
     const tasks = await Task.find({ user: userId });
-    res.status(200).json(tasks);
+    res.status(200).json({ tasks });
+  } catch (err) {
+    if (err instanceof Error) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.status(500).json({ error: 'An unknown error occurred' });
+    }
+  }
+};
+
+/// Excluir todas as tarefas de um usuário
+export const deleteAllTasksByUser = async (req: Request, res: Response): Promise<void> => {
+  const { userId } = req.params;
+
+  try {
+    // Verificar se o usuário existe
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    // Excluir todas as tarefas do usuário
+    await Task.deleteMany({ user: userId });
+
+    // Limpar as referências das tarefas no usuário
+    user.tasks = [];
+    await user.save();
+
+    res.status(200).json({ message: 'All tasks deleted successfully' });
   } catch (err) {
     if (err instanceof Error) {
       res.status(500).json({ error: err.message });
