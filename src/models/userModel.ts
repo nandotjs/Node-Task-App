@@ -1,9 +1,9 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose'
 
 interface IUser extends Document {
-  name: string;
-  password: string;
-  tasks: mongoose.Types.ObjectId[];
+  name: string
+  password: string
+  tasks: mongoose.Types.ObjectId[]
 }
 
 const UserSchema: Schema = new Schema({
@@ -19,7 +19,7 @@ const UserSchema: Schema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Task',
   }]
-});
+})
 
-const User = mongoose.model<IUser>('User', UserSchema);
-export default User;
+const User = mongoose.model<IUser>('User', UserSchema)
+export default User
