@@ -30,11 +30,7 @@ export const createTask = async (
 
     res.status(201).json(savedTask)
   } catch (err) {
-    if (err instanceof Error) {
-      res.status(400).json({ error: err.message })
-    } else {
-      res.status(400).json({ error: 'An unknown error occurred' })
-    }
+    res.status(400).json({ error: err instanceof Error ? err.message : 'An unknown error occurred' })
   }
 }
 
@@ -100,7 +96,7 @@ export const deleteTaskByIndex = async (
       return
     }
 
-    // Converting task index to number
+    // converting task index to number
     const taskIndex = parseInt(index, 10)
     if (isNaN(taskIndex) || taskIndex < 0 || taskIndex >= user.tasks.length) {
       res.status(400).json({ error: 'Invalid task index' })
@@ -110,7 +106,7 @@ export const deleteTaskByIndex = async (
 
     await Task.findByIdAndDelete(taskId)
 
-    // Delete task by index
+    // deleting task by index
     user.tasks.splice(taskIndex, 1)
     await user.save()
 
@@ -124,7 +120,7 @@ export const deleteTaskByIndex = async (
   }
 }
 
-// Task by stats
+// Get task by stats
 export const getTasksByStatus = async (
   req: Request,
   res: Response
@@ -163,6 +159,32 @@ export const updateTaskStatus = async (
     await task.save()
 
     res.status(200).json(task)
+  } catch (err) {
+    if (err instanceof Error) {
+      res.status(500).json({ error: err.message })
+    } else {
+      res.status(500).json({ error: 'An unknown error occurred' })
+    }
+  }
+}
+
+// Mark all tasks as completed
+export const completeAllTasksByUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { userId } = req.params
+
+  try {
+    const user = await User.findById(userId)
+    if (!user) {
+      res.status(404).json({ error: 'User not found' })
+      return
+    }
+
+    await Task.updateMany({ user: userId }, { completed: true })
+
+    res.status(200).json({ message: 'All tasks marked as completed successfully' })
   } catch (err) {
     if (err instanceof Error) {
       res.status(500).json({ error: err.message })
